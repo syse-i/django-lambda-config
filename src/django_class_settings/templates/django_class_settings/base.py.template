@@ -1,0 +1,5 @@
+from src.lambda_config import base
+
+
+class Settings(base.Settings):
+    BASE_DIR = base.BaseDir(__file__)

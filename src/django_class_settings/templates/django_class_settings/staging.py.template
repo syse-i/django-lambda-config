@@ -1,0 +1,10 @@
+from src.lambda_config import staging
+
+from .base import Settings as BaseSettings
+
+
+class Settings(BaseSettings, staging.Settings):
+    pass
+
+
+Settings.load()

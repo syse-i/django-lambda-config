@@ -1,0 +1,10 @@
+from src.lambda_config import production
+
+from .base import Settings as BaseSettings
+
+
+class Settings(BaseSettings, production.Settings):
+    pass
+
+
+Settings.load()
