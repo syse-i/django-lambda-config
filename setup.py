@@ -1,5 +1,5 @@
 """
-    Setup file for django_class_settings.
+    Setup file for class_settings.
     Use setup.cfg to configure your project.
 
     This file was generated with PyScaffold 4.0rc2.
