@@ -56,3 +56,4 @@ MANIFEST
 # Django
 /*.sqlite3
 /settings.py
+/config/
