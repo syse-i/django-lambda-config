@@ -163,7 +163,7 @@ html_theme_options = {
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
 try:
-    from django_class_settings import __version__ as version
+    from django_rtd_config import __version__ as version
 except ImportError:
     pass
 else:
