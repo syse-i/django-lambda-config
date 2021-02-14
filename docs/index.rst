@@ -1,8 +1,8 @@
 =====================
-django_class_settings
+django_rtd_config
 =====================
 
-This is the documentation of **django_class_settings**.
+This is the documentation of **django_rtd_config**.
 
 .. note::
 

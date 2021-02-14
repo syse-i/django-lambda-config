@@ -1,5 +1,5 @@
 =====================
-django_class_settings
+django_rtd_config
 =====================
 
 
