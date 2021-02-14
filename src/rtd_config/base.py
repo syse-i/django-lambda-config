@@ -1,5 +1,7 @@
 import os
 
+from django.utils.translation import gettext as _
+
 from . import Settings as CoreSettings
 from .helpers import base_dir_path
 

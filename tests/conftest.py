@@ -1,5 +1,5 @@
 """
-    Dummy conftest.py for class_settings.
+    Dummy conftest.py for rtd_config.
 
     If you don't know what this is for, just leave it empty.
     Read more about conftest.py under:
