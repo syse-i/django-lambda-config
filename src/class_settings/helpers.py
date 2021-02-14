@@ -6,7 +6,6 @@ from pathlib import Path
 __all__ = [
     'parent_path',
     'base_dir_path',
-    'BaseDir',
 ]
 
 
@@ -16,6 +15,3 @@ def parent_path(file_path, depth, n=0):
 
 def base_dir_path(*args, depth=2):
     return str(parent_path(Path(*args).resolve(), depth))
-
-
-BaseDir = base_dir_path

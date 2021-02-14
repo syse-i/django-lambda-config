@@ -1,4 +1,4 @@
-from ..mixins import DisableSecurityMixin
+from .mixins import DisableSecurityMixin
 from .production import Settings as ProductionSettings
 
 

@@ -1,14 +1,17 @@
 import os
 
-from ..core import Settings as CoreSettings
-from ..helpers import BaseDir
+from . import Settings as CoreSettings
+from .helpers import base_dir_path
 
 __all__ = [
     'Settings',
     'BaseDir',
 ]
 
+BaseDir = base_dir_path
 
+
+# noinspection PyPep8Naming
 class Settings(CoreSettings):
     """
     Lambda Core base settings, don't use this directly.
