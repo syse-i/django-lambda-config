@@ -1,5 +1,5 @@
 """
-    Setup file for rtd_config.
+    Setup file for lambda_config.
     Use setup.cfg to configure your project.
 
     This file was generated with PyScaffold 4.0rc2.
