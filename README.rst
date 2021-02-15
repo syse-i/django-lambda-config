@@ -1,5 +1,5 @@
 =====================
-django_rtd_config
+django_lambda_config
 =====================
 
 
