@@ -27,7 +27,7 @@ class Settings:
     """Class-based settings wrapper."""
 
     @classmethod
-    def load(cls, module_name):
+    def load(cls, module_name="__main__"):
         """
         Export class variables and properties to module namespace.
 
