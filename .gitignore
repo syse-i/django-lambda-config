@@ -57,3 +57,4 @@ MANIFEST
 /*.sqlite3
 /settings.py
 /config/
+/static/
