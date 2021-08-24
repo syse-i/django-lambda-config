@@ -6,62 +6,17 @@ import inspect
 from sys import modules as sys_modules
 from itertools import chain
 from pathlib import Path
-from dataclasses import dataclass, fields, field, MISSING
+from dataclasses import dataclass, fields, Field, field, MISSING
 from typing import List, Callable, Union, Optional
 
-__all__ = ['Settings']
-
-# APPS definition
-_INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-]
-
-_MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-_AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-]
-
-_AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+__all__ = []
 
 
-def liststr_setter(attr: Union[List[str], Callable[[List[str]], List[str]]], default: List[str]) -> List[str]:
+def set_path(base_dir, d):
     """
     DOCSTRING
     """
-    if callable(attr):
-        return attr(default)
-    if isinstance(attr, list):
-        return list(chain(default, attr))
-    if attr is None:
-        return default
-    return attr
+    return str(d if isinstance(d, Path) else Path(base_dir, d))
 
 
 def parent_path(file_path, depth, n=0) -> Path:
@@ -71,38 +26,31 @@ def parent_path(file_path, depth, n=0) -> Path:
     return parent_path(file_path.parent, depth, n + 1) if n < depth else file_path.parent
 
 
-def basedir_setter(*args, default=None, depth=2) -> Path:
+def liststr_setter(value: Union[List[str], Callable[[List[str]], List[str]]], default: List[str]) -> List[str]:
     """
     DOCSTRING
     """
-    return parent_path(Path(*args).resolve(), depth)
+    if callable(value):
+        return value(default)
+    if isinstance(value, list):
+        return list(chain(default, value))
+    if value is None:
+        return default
+    return value
 
 
-# TEMPLATES: List[dict] = field(default_factory=lambda: [
-#     {
-#         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-#         'DIRS': [],
-#         'APP_DIRS': True,
-#         'OPTIONS': {
-#             'context_processors': [
-#                 'django.template.context_processors.debug',
-#                 'django.template.context_processors.request',
-#                 'django.contrib.auth.context_processors.auth',
-#                 'django.contrib.messages.context_processors.messages',
-#             ],
-#         },
-#     }
-# ])
+def basedir_setter(*args, depth=2, default=None) -> Path:
+    """
+    DOCSTRING
+    """
+    return parent_path(Path(*args).resolve(), depth=depth)
+
 
 def template_dirs_setter(base_dir, dirs):
     """
     DOCSTRING
     """
-
-    def set_path(d):
-        return str(d if isinstance(d, Path) else Path(base_dir, d))
-
-    return list(map(set_path, dirs))
+    return list(map(set_path, (base_dir, dirs)))
 
 
 def template_options_setter(value: dict, defaults: dict) -> dict:
@@ -118,45 +66,45 @@ def template_options_setter(value: dict, defaults: dict) -> dict:
     return defaults
 
 
-@dataclass
-class Template:
-    """
-    DOCSTRING
-    """
-    BACKEND: str
-    DIRS: List[str] = field(default_factory=list, metadata={'setter': template_dirs_setter})
-    APP_DIRS: bool = True
-    OPTIONS: dict = field(default_factory=lambda: {
-        'context_processors': [
-            'django.template.context_processors.debug',
-            'django.template.context_processors.request',
-            'django.contrib.auth.context_processors.auth',
-            'django.contrib.messages.context_processors.messages',
-        ]
-    }, metadata={'setter': template_options_setter})
-
-    def set_dirs(self, base_dir):
-        # noinspection PyUnresolvedReferences
-        _field = self.__dataclass_fields__['DIRS']
-        dirs = getattr(self, 'DIRS')
-        func = _field.metadata['setter']  # <-- template_dirs_setter
-        setattr(self, 'DIRS', func(base_dir, dirs))
-
-    def set_options(self):
-        # noinspection PyUnresolvedReferences
-        _field = self.__dataclass_fields__['OPTIONS']
-        if _field.default is not MISSING:
-            defaults = _field.default
-        elif callable(_field.default_factory):
-            defaults = _field.default_factory()
-        else:
-            raise Exception('undefined OPTIONS')
-        value = getattr(self, 'OPTIONS')
-        func = _field.metadata['setter']
-        setattr(self, 'OPTIONS', func(value, defaults))
-
-    def __post_init__(self):
-        self.set_options()
+# @dataclass
+# class Template:
+#     """
+#     DOCSTRING
+#     """
+#     BACKEND: str
+#     DIRS: List[str] = field(metadata={'setter': template_dirs_setter})
+#     APP_DIRS: bool = True
+#     OPTIONS: dict = field(default_factory=lambda: {
+#         'context_processors': [
+#             'django.template.context_processors.debug',
+#             'django.template.context_processors.request',
+#             'django.contrib.auth.context_processors.auth',
+#             'django.contrib.messages.context_processors.messages',
+#         ]
+#     }, metadata={'setter': template_options_setter})
+#
+#     def set_dirs(self, base_dir):
+#         # noinspection PyUnresolvedReferences
+#         _field = self.__dataclass_fields__['DIRS']
+#         dirs = getattr(self, 'DIRS')
+#         func = _field.metadata['setter']  # <-- template_dirs_setter
+#         setattr(self, 'DIRS', func(base_dir, dirs))
+#
+#     def set_options(self):
+#         # noinspection PyUnresolvedReferences
+#         _field = self.__dataclass_fields__['OPTIONS']
+#         if _field.default is not MISSING:
+#             defaults = _field.default
+#         elif callable(_field.default_factory):
+#             defaults = _field.default_factory()
+#         else:
+#             raise Exception('undefined OPTIONS')
+#         value = getattr(self, 'OPTIONS')
+#         func = _field.metadata['setter']
+#         setattr(self, 'OPTIONS', func(value, defaults))
+#
+#     def __post_init__(self):
+#         self.set_options()
 
 
 # @dataclass
@@ -190,36 +138,9 @@ class Template:
 #         value = getattr(self, 'OPTIONS')
 #         func = _field.metadata['setter']
 #         setattr(self, 'OPTIONS', func(value, defaults))
-#
-#     def __post_init__(self):
-#         self.set_options()
-
-#
-#
-# ListTemplate = List[Template]
-# OptionalListTemplate = Union[ListTemplate, Callable[[ListTemplate], ListTemplate], None]
 
 
-# ('CONTEXT_PROCESSORS', liststr_setter, __CONTEXT_PROCESSORS),
-
-# {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(self.BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
-# @dataclass
-# class DATABASE:
-#     tag_name: str
-#     ENGINE: str
-#     NAME: Path
-#
-#     def __post_init__(self):
-#         pass
-
-
-@dataclass(frozen=False)
+@dataclass
 class Settings:
     """
     Class based settings for complex settings inheritance.
@@ -239,9 +160,11 @@ class Settings:
 
     ALLOWED_HOSTS: List[str] = field(default_factory=list, metadata={'setter': liststr_setter})
 
-    INSTALLED_APPS: List[str] = field(default_factory=lambda: _INSTALLED_APPS, metadata={'setter': liststr_setter})
+    INSTALLED_APPS: List[str] = field(default_factory=list, metadata={
+        'setter': liststr_setter,
+    })
 
-    MIDDLEWARE: List[str] = field(default_factory=lambda: _MIDDLEWARE, metadata={'setter': liststr_setter})
+    MIDDLEWARE: List[str] = field(default_factory=list, metadata={'setter': liststr_setter})
 
     ROOT_URLCONF: str = os.environ.get('ROOT_URLCONF', 'config.urls')
 
@@ -257,9 +180,9 @@ class Settings:
     #         },
     #     }]
 
-    TEMPLATES: List[Template] = field(default_factory=lambda: [
-        Template('django.template.backends.django.DjangoTemplates')
-    ])
+    # TEMPLATES: List[Template] = field(default_factory=lambda: [
+    #     Template('django.template.backends.django.DjangoTemplates')
+    # ])
 
     WSGI_APPLICATION: str = os.environ.get('WSGI_APPLICATION', 'config.wsgi.application')
 
@@ -277,14 +200,12 @@ class Settings:
     # Password validation
     # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 
-    AUTH_PASSWORD_VALIDATORS: List[str] = field(default_factory=lambda: _AUTH_PASSWORD_VALIDATORS,
-                                                metadata={'setter': liststr_setter})
+    AUTH_PASSWORD_VALIDATORS: List[str] = field(default_factory=list, metadata={'setter': liststr_setter})
 
     # Authentication
     # https://docs.djangoproject.com/en/3.0/topics/auth/customizing/
 
-    AUTHENTICATION_BACKENDS: List[str] = field(default_factory=lambda: _AUTHENTICATION_BACKENDS,
-                                               metadata={'setter': liststr_setter})
+    AUTHENTICATION_BACKENDS: List[str] = field(default_factory=list, metadata={'setter': liststr_setter})
 
     # Internationalization
     # https://docs.djangoproject.com/en/3.0/topics/i18n/
@@ -330,6 +251,52 @@ class Settings:
     # def MEDIA_ROOT(self):
     #     return os.path.join(self.BASE_DIR, 'media/')
 
+    class Meta:
+        """
+        DOCSTRING
+        """
+
+        # APPS definition
+        INSTALLED_APPS = [
+            'django.contrib.admin',
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
+            'django.contrib.sessions',
+            'django.contrib.messages',
+            'django.contrib.staticfiles',
+        ]
+
+        MIDDLEWARE = [
+            'django.middleware.security.SecurityMiddleware',
+            'django.contrib.sessions.middleware.SessionMiddleware',
+            'django.middleware.common.CommonMiddleware',
+            'django.middleware.csrf.CsrfViewMiddleware',
+            'django.contrib.auth.middleware.AuthenticationMiddleware',
+            'django.contrib.messages.middleware.MessageMiddleware',
+            'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        ]
+
+        AUTHENTICATION_BACKENDS = [
+            'django.contrib.auth.backends.ModelBackend',
+        ]
+
+        AUTH_PASSWORD_VALIDATORS = [
+            {
+                'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+            },
+            {
+                'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+            },
+            {
+                'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+            },
+            {
+                'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+            },
+        ]
+
+        ALLOWED_HOSTS = []
+
     ###########################################################################
     #                                                                         #
     ###########################################################################
@@ -338,31 +305,13 @@ class Settings:
         for _field in fields(self):
             setter_func = _field.metadata.get('setter')
             if callable(setter_func):
-                attr_val = getattr(self, _field.name)
-                if _field.default is not MISSING:
-                    default = _field.default
-                elif _field.default_factory and callable(_field.default_factory):
-                    default = _field.default_factory()
-                else:
-                    default = None
-                setattr(self, _field.name, setter_func(attr_val, default=default))
+                value = getattr(self, _field.name)
+                setattr(self, _field.name, setter_func(value(getattr(self.Meta, _field.name))))
 
-            if _field.name == 'TEMPLATES':
-                attr_val = getattr(self, 'TEMPLATES')
-                for t in attr_val:
-                    t.set_dirs(self.BASE_DIR)
-
-        # default_attrs = [
-        #     ('_INSTALLED_APPS', liststr_setter, _INSTALLED_APPS),
-        #     ('_MIDDLEWARE', liststr_setter, _MIDDLEWARE),
-        #     ('_AUTHENTICATION_BACKENDS', liststr_setter, _AUTHENTICATION_BACKENDS),
-        #     ('_AUTH_PASSWORD_VALIDATORS', liststr_setter, _AUTH_PASSWORD_VALIDATORS),
-        #     ('ALLOWED_HOSTS', liststr_setter, ALLOWED_HOSTS),
-        # ]
-        #
-        # for attr_name, parser, default in default_attrs:
-        #     attr = getattr(self, attr_name)
-        #     setattr(self, attr_name, parser(attr, default))
+            # if _field.name == 'TEMPLATES':
+            #     attr_val = getattr(self, 'TEMPLATES')
+            #     for t in attr_val:
+            #         t.set_dirs(self.BASE_DIR)
 
     ###########################################################################
     #                                                                         #
@@ -389,18 +338,30 @@ class Settings:
 def main():
     x = Settings(
         __file__,
-        ALLOWED_HOSTS=[
-            'foo.com'
-        ],
-        TEMPLATES=[
-            Template(
-                'django.template.backends.django.DjangoTemplates',
-                DIRS=['templates/']
-            )
-        ]
+        INSTALLED_APPS=lambda x: list(chain(x, ['foo'])),
+        # TEMPLATES=[
+        #     Template(
+        #         'django.template.backends.django.DjangoTemplates',
+        #         DIRS=['templates/']
+        #     )
+        # ]
     )
     x.load()
-    print(x.TEMPLATES)
+    print(x)
+
+    # @dataclass
+    # class X:
+    #     FOO: List = field(default_factory=lambda *args: list(chain([1, 2, 3], *args)))
+    #
+    #     def __post_init__(self):
+    #         for _field in fields(self):
+    #             current = getattr(self, _field.name, [])
+    #             setattr(self, _field.name, _field.default_factory(current))
+    #
+    # x = X([4, 5, 6])
+    # print(x.FOO)
+
+    # print(x.TEMPLATES)
     # print(BASE_DIR)
     # t = Template(DIRS=['templates', Path('/Users/dsv/')])
     # t.set_dirs(x.BASE_DIR)
