@@ -5,7 +5,10 @@ name = "pypi"
 
 [packages]
 django = "*"
-django-extensions = "*"
+click = "*"
+attrs = "*"
+omegaconf = "*"
+hydra-core = "*"
 
 [dev-packages]
 django-extensions = "*"

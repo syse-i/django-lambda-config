@@ -59,3 +59,5 @@ MANIFEST
 /config/
 /static/
 /media/
+
+/lambda/

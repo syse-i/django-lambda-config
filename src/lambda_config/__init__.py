@@ -16,30 +16,7 @@ except PackageNotFoundError:  # pragma: no cover
 finally:
     del version, PackageNotFoundError
 
+from .helpers import load_settings
+from .core import Settings
 
-"""Class based settings for complex settings inheritance."""
-
-import inspect
-import sys
-
-
-class Settings:
-    """Class-based settings wrapper."""
-
-    @classmethod
-    def load(cls, module_name="__main__"):
-        """
-        Export class variables and properties to module namespace.
-
-        This will export and class variable that is all upper case and doesn't
-        begin with ``_``. These members will be set as attributes on the module
-        ``module_name``.
-        """
-        self = cls()
-        module = sys.modules[module_name]
-        for (member, value) in inspect.getmembers(self):
-            if member.isupper() and not member.startswith('_'):
-                if isinstance(value, property):
-                    # noinspection PyArgumentList
-                    value = value.fget(self)
-                setattr(module, member, value)
+__all__ = ['load_settings', 'Settings']

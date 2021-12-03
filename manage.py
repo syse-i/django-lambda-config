@@ -15,13 +15,11 @@ the sake of backward compatibility of the developer's workflow.
 import os
 import sys
 
-# This makes the package usable even without being installed with pip
-# (redundant in the case the developer uses `python setup.py develop`)
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
+from lambda_config import load_settings
 
 
+@load_settings
 def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.local')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -34,5 +32,11 @@ def main():
 
 
 if __name__ == '__main__':
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lambda_config.settings.local')
+
+    # This makes the package usable even without being installed with pip
+    # (redundant in the case the developer uses `python setup.py develop`)
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
+
     main()
 
