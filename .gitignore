@@ -56,8 +56,9 @@ MANIFEST
 # Django
 /*.sqlite3
 /settings.py
-/config/
 /static/
 /media/
 
 /lambda/
+/foobar/
+/config/

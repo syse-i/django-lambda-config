@@ -19,10 +19,9 @@ def load_settings(func: Callable) -> Callable:
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        settings_module = import_module(environ.get('DJANGO_SETTINGS_MODULE'))
-        settings_instance = getattr(settings_module, 'settings')
-        for key, value in asdict(settings_instance).items():
-            # if key.isupper() and not key.startswith('_'):
-            setattr(settings_module, key, value)
+        mod = import_module(environ.get('DJANGO_SETTINGS_MODULE'))
+        inst = getattr(mod, 'settings')
+        for key, value in asdict(inst).items():
+            setattr(mod, key, value)
         return func(*args, **kwargs)
     return wrapper
